@@ -12,13 +12,20 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        
-        <activity android:name=".lesson1.MainActivity"
+        <activity android:name="com.jdk.corso.lesson2.PeopleFragmentActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name="com.jdk.corso.lesson2.PeopleActivity"
+            android:label="@string/app_name">
+            
+        </activity>
+        <activity android:name=".lesson1.MainActivity"
+            android:label="@string/app_name">
+            
         </activity>
         
         <activity android:name=".lesson1.HelloWorldActivity"
