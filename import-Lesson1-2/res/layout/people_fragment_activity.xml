@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <fragment
+        android:id="@+id/InputFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        class="com.jdk.corso.lesson2.PeopleInputFragment"
+        tools:layout="@layout/input_layout" />
+
+    <fragment
+        android:id="@+id/PeopleList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.jdk.corso.lesson2.PeopleListFragment"
+        tools:layout="@layout/people_list" />
+
+</LinearLayout>

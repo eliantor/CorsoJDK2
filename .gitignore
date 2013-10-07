@@ -3,3 +3,11 @@
 /.idea/**
 .DS_Store
 *.iml
+.classpath
+.settings
+.project
+bin/**
+libs/**
+gen/**
+proguard-project.txt
+project.properties
