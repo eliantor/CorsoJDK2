@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="me.eto.justdoit"
+          android:versionCode="1"
+          android:versionName="1.0">
+
+    <uses-sdk
+        android:minSdkVersion="10"
+        android:targetSdkVersion="18"/>
+
+    <permission
+        android:name="me.eto.justdoit.READ_TODOS"
+        android:protectionLevel="normal"/>
+    <permission
+        android:name="me.eto.justdoit.WRITE_TODOS"
+        android:protectionLevel="normal"/>
+
+    <permission
+        android:name="me.eto.justdoit.PRIVATE"
+        android:protectionLevel="signatureOrSystem"/>
+
+    <uses-permission android:name="me.eto.justdoit.READ_TODOS"/>
+
+    <uses-permission android:name="me.eto.justdoit.WRITE_TODOS"/>
+
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <!--
+        <activity
+            android:name=".DynamicFragmentsActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        -->
+        <activity
+            android:name=".home.MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".edit.EditTodo"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="me.eto.justdoid.intent.action.ADD_TODO"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:authorities="me.eto.justdoit.provider"
+            android:name=".data.TodoProvider"
+            android:exported="true"
+            android:readPermission="me.eto.justdoit.READ_TODOS"
+            android:writePermission="me.eto.justdoit.WRITE_TODOS"/>
+
+    </application>
+
+</manifest>
