@@ -1,14 +1,17 @@
 package me.eto.justdoit.home;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
-import android.app.Activity;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import me.eto.justdoit.R;
 import me.eto.justdoit.edit.EditTodo;
+import me.eto.justdoit.internet.NetworkClient;
+import me.eto.justdoit.notifications.AutoTodoService;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -21,6 +24,31 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.main_activity);
     }
 
+    /**
+     * We can use this over fragment on attach
+     * to let the activity decide how to handle
+     * fragments callbacks
+     *
+     * @param fragment
+     */
+    @Override
+    public void onAttachFragment(Fragment fragment) {
+        super.onAttachFragment(fragment);
+        if (fragment instanceof ListTodosFragment) {
+            // when the listTodoFragment is attached
+            ListTodosFragment targetFragment = (ListTodosFragment) fragment;
+            // we set the listener
+            targetFragment.setOnTodoItemActionListener(fTodoActionListener);
+        }
+    }
+
+    private final ListTodosFragment.OnTodoItemActionListener fTodoActionListener
+            = new ListTodosFragment.OnTodoItemActionListener() {
+        @Override
+        public void onTodoItemSelected(Uri todoItemUri) {
+
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -34,6 +62,9 @@ public class MainActivity extends ActionBarActivity {
         if (item.getItemId() == R.id.action_add) {
             // todo add action
             startActivityForResult(new Intent(this, EditTodo.class), CREATE_TODO_REQUEST);
+        } else if (item.getItemId() == R.id.action_start_service) {
+            AutoTodoService.start(this, "Palla", 1000);
+            NetworkClient.download(this, "http://adroid-eliantor.rhcloud.com/todos");
         }
         return super.onOptionsItemSelected(item);
     }

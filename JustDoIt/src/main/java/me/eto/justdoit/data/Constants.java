@@ -8,23 +8,23 @@ import android.content.UriMatcher;
 
 import me.eto.justdoit.Contract;
 
-import static me.eto.justdoit.Contract.*;
+import static me.eto.justdoit.Contract.Todos;
 
 class Constants {
 
     final static String DB_NAME    = "todos.db";
-    final static int    DB_VERSION = 1;
+    final static int    DB_VERSION = 2;
 
-    public static final String CREATE_TODOS = "CREATE TABLE " + Todos.PATH + " (" +
+    static final String CREATE_TODOS = "CREATE TABLE " + Todos.PATH + " (" +
             Todos.Fields.ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
             Todos.Fields.TITLE + " TEXT," +
             Todos.Fields.DESCRIPTION + " TEXT," +
             Todos.Fields.DATE + " INTEGER," +
             Todos.Fields.STATUS + " INTEGER," +
+            Todos.Fields.DUE_DATE + " INTEGER DEFAULT " + Todos.UNSCHEDULED + "," +
             Todos.Fields.USER + " TEXT)";
 
-    public static final String DROP_TODOS = "DROP TABLE " + Todos.PATH;
-
+    static final String DROP_TODOS = "DROP TABLE " + Todos.PATH;
 
     static class Match {
 

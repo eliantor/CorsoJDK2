@@ -6,4 +6,9 @@
         android:orderInCategory="100"
         android:showAsAction="always"
         app:showAsAction="always"/>
+    <item
+        android:id="@+id/action_start_service"
+        android:title="Start"
+        android:showAsAction="always"
+        app:showAsAction="always"/>
 </menu>

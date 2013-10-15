@@ -3,10 +3,11 @@ package me.eto.justdoit.edit;
 import android.app.Activity;
 import android.content.AsyncQueryHandler;
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+
+import java.lang.ref.WeakReference;
 
 import me.eto.justdoit.Contract;
 
@@ -17,23 +18,128 @@ public class EditTodoWorker extends Fragment {
 
     private final static int INSERT_TODO = 1;
 
-    /**
-     * This is non static, but we can't leak the
-     * reference because the fragment is retained
-     */
-    private class InternalQueryHandler extends AsyncQueryHandler {
+    private static abstract class BaseQueryHandler extends AsyncQueryHandler {
 
-        InternalQueryHandler() {
-            super(getActivity().getContentResolver());
+        public BaseQueryHandler(EditTodoWorker w) {
+            super(w.getActivity().getContentResolver());
+        }
+
+
+        public abstract void detach();
+
+    }
+
+    /**
+     * Non essendo statico non possiamo decidere quale policy
+     * utilizzare per la terminazione, perché non abbiamo un
+     * riferimento esplicto al fragment. Per cui possiamo solo
+     * annullare.
+     */
+    private class NonStaticQueryHandler extends BaseQueryHandler {
+
+        NonStaticQueryHandler(EditTodoWorker w) {
+            super(w);
         }
 
         @Override
         protected void onInsertComplete(int token, Object cookie, Uri uri) {
             handleQueryCompletion(uri);
         }
+
+        @Override
+        public void detach() {
+
+        }
     }
 
-    private InternalQueryHandler mHandler;
+
+    /**
+     * Lasciamo il controllo del detachment dal fragment
+     * al sistema. Ovvero l'operazione termina ma non ci
+     * viene segnalato, se il sistema ritiene il fragment
+     * contenitore non serve piú
+     */
+    @SuppressWarnings("unused")
+    private static class StaticWeakQueryHandler extends BaseQueryHandler {
+
+        private final WeakReference<EditTodoWorker> mOwnerRef;
+
+        StaticWeakQueryHandler(EditTodoWorker w) {
+            super(w);
+            mOwnerRef = new WeakReference<EditTodoWorker>(w);
+        }
+
+        @Override
+        public void detach() {
+
+        }
+
+        @Override
+        protected void onInsertComplete(int token, Object cookie, Uri uri) {
+            final EditTodoWorker w = mOwnerRef.get();
+            if (w != null) {
+                w.handleQueryCompletion(uri);
+            }
+        }
+    }
+
+    /**
+     * Come il caso precedente, ma siamo noi che esplicitamente
+     * dobbiamo staccare il fragment dal thread tramite detach
+     * quando lo riteniamo piú opportuno.
+     */
+    @SuppressWarnings("unused")
+    private static class StaticQueryHandler extends BaseQueryHandler {
+
+        private EditTodoWorker mOwner;
+
+        StaticQueryHandler(EditTodoWorker w) {
+            super(w);
+            mOwner = w;
+        }
+
+        @Override
+        protected void onInsertComplete(int token, Object cookie, Uri uri) {
+            if (mOwner != null) mOwner.handleQueryCompletion(uri);
+        }
+
+        @Override
+        public void detach() {
+            mOwner = null;
+        }
+    }
+
+    /**
+     * This is non static, but we can't leak the
+     * reference because the fragment is retained
+     */
+//    private static class InternalQueryHandler extends AsyncQueryHandler {
+//
+//        private EditTodoWorker mOwner;
+////        private WeakReference<EditTodoWorker> mOwnerRef;
+//
+//        InternalQueryHandler(EditTodoWorker owner) {
+//            super(owner.getActivity().getContentResolver());
+////            mOwnerRef =new WeakReference<EditTodoWorker>(owner);
+//            mOwner =owner;
+//        }
+//
+//        public void detach(){
+//            mOwner = null;
+//        }
+//
+//        @Override
+//        protected void onInsertComplete(int token, Object cookie, Uri uri) {
+////            final EditTodoWorker w=mOwnerRef.get();
+////
+////            if (w != null)w.handleQueryCompletion(uri);
+//
+//              if (mOwner!=null)mOwner.handleQueryCompletion(uri);
+////           .handleQueryCompletion(uri);
+//        }
+//    }
+
+    private BaseQueryHandler mHandler;
 
     /**
      * A callback set by the activity
@@ -65,9 +171,9 @@ public class EditTodoWorker extends Fragment {
 
     /**
      * This is called whenever the fragment is reattached
-     * to the activity being retaine or not
+     * to the activity being retained or not
      *
-     * @param activity
+     * @param activity to attach to
      */
     @Override
     public void onAttach(Activity activity) {
@@ -142,7 +248,7 @@ public class EditTodoWorker extends Fragment {
         // this method won't be called again
         // during restarts and config changes,
         // thus is a true once only initialization
-        mHandler = new InternalQueryHandler();
+        mHandler = new NonStaticQueryHandler(this);
     }
 
     /**
@@ -202,5 +308,8 @@ public class EditTodoWorker extends Fragment {
         //pending operations, in thi case, all ops
         // are identified by the same token.
         mHandler.cancelOperation(INSERT_TODO);
+        mHandler.detach();
+        mHandler = null;
+
     }
 }

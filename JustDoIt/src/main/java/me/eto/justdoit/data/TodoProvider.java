@@ -39,7 +39,9 @@ public class TodoProvider extends ContentProvider {
         }
         SQLiteDatabase db = mDb.getReadableDatabase();
         final Cursor cursor = sqb.query(db, projection, selection, selectionArgs, null, null, sortOrder);
-
+        if (cursor != null) {
+            cursor.setNotificationUri(getContext().getContentResolver(), uri);
+        }
         return cursor;
     }
 
@@ -64,7 +66,10 @@ public class TodoProvider extends ContentProvider {
         SQLiteDatabase db = mDb.getWritableDatabase();
         long id = db.insert(table, null, values);
         if (id != -1) {
-            return ContentUris.withAppendedId(uri, id);
+            Uri newUri = ContentUris.withAppendedId(uri, id);
+            getContext().getContentResolver().notifyChange(newUri,
+                    null);
+            return newUri;
         }
         return null;
     }

@@ -55,12 +55,16 @@ public final class Contract {
         }
 
         public final static int DONE    = 1;
+
         public final static int PENDING = 0;
+
+        public final static int UNSCHEDULED = -1;
 
         public static Cursor getAllTodos(ContentResolver resolver, String selection,
                                          String[] selectionArgs) {
             return resolver.query(CONTENT_URI, null, selection, selectionArgs, null);
         }
+
 
         public static ContentValues getTodoById(ContentResolver resolver, long id) {
             Uri uri = ContentUris.withAppendedId(CONTENT_URI, id);
@@ -68,10 +72,7 @@ public final class Contract {
             try {
                 if (cursor.moveToFirst()) {
                     ContentValues vals = new ContentValues();
-                    DatabaseUtils.cursorIntToContentValues(cursor, Fields.ID, vals);
-                    DatabaseUtils.cursorIntToContentValues(cursor, Fields.TITLE, vals);
-                    DatabaseUtils.cursorIntToContentValues(cursor, Fields.DESCRIPTION, vals);
-                    //... ecc;
+                    DatabaseUtils.cursorRowToContentValues(cursor, vals);
                     return vals;
                 }
                 return null;
@@ -89,9 +90,12 @@ public final class Contract {
             public final static String DESCRIPTION = "description";
             public final static String USER        = "user";
             public final static String STATUS      = "done";
+            public final static String DUE_DATE    = "due_date";
+
+            public static final String[] ALL_COLUMNS = {
+                    ID, TITLE, DATE, DESCRIPTION, USER, STATUS, DUE_DATE
+            };
         }
-
-
     }
 
 
