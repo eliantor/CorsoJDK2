@@ -1,27 +1,73 @@
 package me.eto.justdoit.home;
 
+import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import me.eto.justdoit.R;
 import me.eto.justdoit.edit.EditTodo;
+import me.eto.justdoit.globals.JustDoIt;
 import me.eto.justdoit.internet.NetworkClient;
 import me.eto.justdoit.notifications.AutoTodoService;
 
 public class MainActivity extends ActionBarActivity {
 
+    private final static String       REPLY_CHANNEL = MainActivity.class.getName() + ".reply";
+    private final static IntentFilter FILTER        = new IntentFilter(REPLY_CHANNEL);
+
+    private class Receiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    }
+
     private final static int CREATE_TODO_REQUEST = 1;
     private final static int EDIT_TODO_REQUEST   = 2;
+
+
+    private Receiver mReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+
+        /* talk with my application*/
+        Application app = getApplication();
+        JustDoIt myApp = (JustDoIt) app;
+        JustDoIt myAppAlt = JustDoIt.get();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mReceiver =new Receiver();
+
+        final Intent lastEvent = this.registerReceiver(mReceiver, FILTER);
+        //,"pemission", new Handler());
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver,FILTER);
+
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        unregisterReceiver(mReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
+        mReceiver = null;
     }
 
     /**
@@ -64,7 +110,7 @@ public class MainActivity extends ActionBarActivity {
             startActivityForResult(new Intent(this, EditTodo.class), CREATE_TODO_REQUEST);
         } else if (item.getItemId() == R.id.action_start_service) {
             AutoTodoService.start(this, "Palla", 1000);
-            NetworkClient.download(this, "http://adroid-eliantor.rhcloud.com/todos");
+            NetworkClient.download(this, "http://adroid-eliantor.rhcloud.com/todos",REPLY_CHANNEL);
         }
         return super.onOptionsItemSelected(item);
     }

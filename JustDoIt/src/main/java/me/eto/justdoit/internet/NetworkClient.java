@@ -1,10 +1,15 @@
 package me.eto.justdoit.internet;
 
 import android.app.IntentService;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+
+import com.google.android.gms.internal.ac;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,15 +19,18 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import me.eto.justdoit.Contract;
+
 /**
  * Created by eto on 10/12/13.
  */
 public class NetworkClient extends IntentService {
+    private final static String REPLY_TO = "reply_to";
 
-    public static void download(Context context, String url) {
+    public static void download(Context context, String url,String action) {
         context.startService(new Intent(context, NetworkClient.class)
-                .setData(Uri.parse(url)
-                ));
+                .setData(Uri.parse(url))
+                .putExtra(REPLY_TO, action));
     }
 
     /**
@@ -38,7 +46,12 @@ public class NetworkClient extends IntentService {
         Uri connectTo = intent.getData();
         HttpURLConnection connection = null;
         InputStream in = null;
+        final String replyChannel = intent.getStringExtra(REPLY_TO);
         try {
+//            sendBroadcast(new Intent(replyChannel).putExtra("state","starting..."));
+            LocalBroadcastManager.getInstance(this)
+                    .sendBroadcast(new Intent(replyChannel).putExtra("state","starting..."));
+
             URL url = new URL(connectTo.toString());
             connection = (HttpURLConnection) url.openConnection();
 //            connection.setRequestMethod("GET");
@@ -58,8 +71,10 @@ public class NetworkClient extends IntentService {
                 while ((line = reader.readLine()) != null) {
                     sb.append(line).append('\n');
                 }
-
+                String data = sb.toString();
+                saveData(data);
                 Log.d("RECEIVED", sb.toString());
+
             } else {
                 Log.d("ERROR", "Wrong: " + status);
             }
@@ -79,5 +94,12 @@ public class NetworkClient extends IntentService {
                 connection.disconnect();
             }
         }
+    }
+
+    private void saveData(String data){
+        ContentResolver cr = getContentResolver();
+        ContentValues v  = new ContentValues();
+        v.put(Contract.Todos.Fields.TITLE,data);
+        cr.insert(Contract.Todos.CONTENT_URI,v);
     }
 }

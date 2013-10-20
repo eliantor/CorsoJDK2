@@ -68,7 +68,7 @@ public class TodoProvider extends ContentProvider {
         if (id != -1) {
             Uri newUri = ContentUris.withAppendedId(uri, id);
             getContext().getContentResolver().notifyChange(newUri,
-                    null);
+                    null,true /*sync*/);
             return newUri;
         }
         return null;

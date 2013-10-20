@@ -15,13 +15,19 @@ import android.widget.ListView;
 
 import me.eto.justdoit.Contract;
 import me.eto.justdoit.R;
+import me.eto.justdoit.utils.IdGen;
 
 /**
  * Created by eto on 10/5/13.
  */
 public class ListTodosFragment extends Fragment {
 
-    private final static int      TODO_LOADER_ID = 1;
+    /**
+     * Usare un id preso dalle risorse garantisce l'unicitá dell'id stesso
+     * per tutta l'applicazione.
+     *
+     */
+    private final static int      TODO_LOADER_ID = R.id.loader_id;
     private final static Uri      TODO_URI       = Contract.Todos.CONTENT_URI;
     private final static String[] PROJECTION     = Contract.Todos.Fields.ALL_COLUMNS;
     private final static String   SORTING        = Contract.Todos.Fields.DATE;
@@ -84,6 +90,7 @@ public class ListTodosFragment extends Fragment {
          */
         @Override
         public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
+
             if (loaderId == TODO_LOADER_ID) {
 
                 return new CursorLoader(getActivity(), TODO_URI,

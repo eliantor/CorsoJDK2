@@ -1,6 +1,7 @@
 package me.eto.justdoit.loaders;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.ContentObservable;
 import android.support.v4.content.AsyncTaskLoader;
 
@@ -32,7 +33,25 @@ public abstract class SimpleCustomLoader<T extends ContentObservable> extends As
      */
 
     private ForceLoadContentObserver mObserver;
+    /*
+    private PrefsContentListener mPrefsContentListener;
 
+    private class PrefsContentListener implements SharedPreferences.OnSharedPreferenceChangeListener{
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            onContentChanged();
+        }
+    }
+
+    public SimpleCustomLoader(Context context,String prefs){
+        super(context);
+        mPrefsContentListener = new PrefsContentListener();
+        SharedPreferences p = context.getSharedPreferences(prefs,Context.MODE_PRIVATE);
+        p.registerOnSharedPreferenceChangeListener(mPrefsContentListener);
+
+    }
+    */
     public SimpleCustomLoader(Context context) {
         super(context);
         mObserver = new ForceLoadContentObserver();
@@ -102,9 +121,16 @@ public abstract class SimpleCustomLoader<T extends ContentObservable> extends As
             //if we ve not delivered the same
             //payload and we had a previous one
             //we need to dispose it
-            dispose(data);
+            dispose(oldData);
         }
     }
+
+//    private boolean changed;
+//    public boolean take(){
+//        boolean c = changed;
+//        changed = false;
+//        return c;
+//    }
 
     @Override
     protected void onStartLoading() {
@@ -114,7 +140,7 @@ public abstract class SimpleCustomLoader<T extends ContentObservable> extends As
             //we have ready a result so just deliver it
             deliverResult(mPayload);
         }
-        if (takeContentChanged() || mPayload != null) {
+        if (takeContentChanged() || mPayload == null) {
             //we didn't have a result or content has changed
             //so we load it
             forceLoad();
